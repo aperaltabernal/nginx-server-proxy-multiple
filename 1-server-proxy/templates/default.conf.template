@@ -1,7 +1,7 @@
 server {
     listen ${PROXY_SERVER_PORT};
     location / {
-        proxy_pass http://${PROXIED_SERVER_HOSTNAME}:8181;
+        proxy_pass http://${PROXIED_SERVER_HOSTNAME}:${PROXIED_SERVER_PORT};
     }
 
     location ~ \.(jpg|png)$ {

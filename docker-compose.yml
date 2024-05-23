@@ -20,8 +20,9 @@ services:
     # env_file:
     #   - .env
     environment:
-      PROXIED_SERVER_HOSTNAME: ${PROXIED_SERVER_HOSTNAME}
       PROXY_SERVER_PORT: ${PROXY_SERVER_PORT}
+      PROXIED_SERVER_HOSTNAME: ${PROXIED_SERVER_HOSTNAME}
+      PROXIED_SERVER_PORT: ${PROXIED_SERVER_PORT}
     container_name: c-proxy-server
     ports:
       - ${PROXY_SERVER_PORT}:80
