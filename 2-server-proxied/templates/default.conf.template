@@ -1,0 +1,8 @@
+server {
+    listen ${PROXIED_SERVER_PORT};
+    root /data/www;
+
+    location / {
+        
+    }
+}

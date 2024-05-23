@@ -1,6 +1,5 @@
 FROM nginx
 WORKDIR /data
 COPY index.html ./www/index.html
-COPY nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 8181
+ARG PROXIED_SERVER_PORT
+EXPOSE $PROXIED_SERVER_PORT
