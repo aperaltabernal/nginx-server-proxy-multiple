@@ -8,6 +8,14 @@ Se debe crear un __volumen__ en el __docker-compose.yml__, en el servicio (en *d
 
 En este ejemplo las variables que deseamos reemplazar son <code>${PROXY_SERVER_PORT}</code>, <code>${PROXIED_SERVER_HOSTNAME}</code> y <code>${PROXIED_SERVER_PORT}</code>, las cuales representan el puerto para exponer el __reverse proxy server__ actual, el *host* donde se ubica el __server proxied__ con los recursos a ser servidos y su puerto respectivamente. Esto es necesario ya que para poder pasar el nombre del host, que en este caso es el nombre del contenedor y el puerto, de una manera más parametrizable, se requiere que este archivo tome los cambios al momento de iniciarse el servidor, en caso contrario tendríamos que ingresar al servidor, sustituir la ip y el host que deseamos y luego recargar el servicio del nginx.
 
+Tener en cuenta que en Docker, el nobmre de un contenedor funciona como un DNS el cual puede ser accedido, en la misma red, por su nombre, es por eso que en el __docker-compose.yml__, en el servicio __proxied__ el nobmre del contenedor es la misma variable de entorno que representa el *hostname* que se incluirá en el servidor virtual del nginx de nuestro servidor proxy (*reverse proxy server*). Así quedaría el nombre del contenedor __proxied__ configurado:
+```
+services:
+    proxied:
+        ...
+        container_name: ${PROXIED_SERVER_HOSTNAME}
+```
+
 A continuación, el contenido del archivo __default.conf.template__:
 
 ```
@@ -26,12 +34,12 @@ server {
 El volumen debe apuntar a la ruta __/etc/nginx/templates__.
 
 ```
-    services:
+services:
+    ...
+    proxy:
         ...
-        proxy:
-            ...
-            volumes:
-            - ./1-server-proxy/templates:/etc/nginx/templates
+        volumes:
+        - ./1-server-proxy/templates:/etc/nginx/templates
 ```
 
 El archivo __/etc/nginx/nginx.conf__ el cual se encuentra dentro del servidor de *nginx* incluye o utiliza los archivos ubicados en el directorio __/etc/nginx/conf.d/__, en este caso es el __default.conf__ el cual es reemplazado y sustituido por el archivo ubicado en la ruta __/etc/nginx/template/__ en este caso __default.conf.template__.
@@ -49,13 +57,13 @@ Siempre, al iniciarse el servidor, se ejecutan una serie de *shell commands* (.s
 - En el __docker-compose.yml__, en el servicio que va a necesitar las variables de entorno, agregar las variables con el atributo <code>environment</code>:
 
 ```
-    services:
+services:
+    ...
+    proxy:
         ...
-        proxy:
-            ...
-            environment:
-                PROXIED_SERVER_HOSTNAME: ${PROXIED_SERVER_HOSTNAME}
-                PROXY_SERVER_PORT: ${PROXY_SERVER_PORT}
+        environment:
+            PROXIED_SERVER_HOSTNAME: ${PROXIED_SERVER_HOSTNAME}
+            PROXY_SERVER_PORT: ${PROXY_SERVER_PORT}
 ```
 
 ## (Opción 2) Agregar variables de entorno al contenedor con un archivo .env:
@@ -65,12 +73,12 @@ Siempre, al iniciarse el servidor, se ejecutan una serie de *shell commands* (.s
 - Se debe colocar dentro del __docker-compose.yml__, en el servicio que va a necesitar el archivo de variables de entorno lo siguiente, donde __.env__ es el archivo creado por nosotros para agregar las variables de entorno:
 
 ```
-    services:
+services:
+    ...
+    proxy:
         ...
-        proxy:
-            ...
-            env_file:
-                - .env
+        env_file:
+            - .env
 ```
 
 En este caso, el servicio __proxy__ (*1-server-proxy*) es el contenedor que se debe comunicar con el servicio destino __proxied__ (*2-server-proxied*). Para que el archivo __/etc/nginx/conf.d/default.conf__, en su directiva <code>proxy_pass</code> del <code>location</code> se pueda reemplazar la ip y puerto del servidor __proxied__ realizamos este procedimiento. Ahí es donde deseamos reemplazar las variables de entorno para que sea dinámica la configuración del servidor destino desde el servidor proxy. Al agregar las variables de entorno al servicio, estas quedan establecidas en las variables del sistema del contenedor las cuales se pueden visualizar, ingresando primero a la consola del contenedor mediante la instrucción:
@@ -80,7 +88,7 @@ docker exec -it <id_contenedor> /sh
 
 y ejecutando el siguiente comando:
 ```
-    env
+env
 ```
 Esto mostrará las variables de entorno del contenedor entre ellas las que se pasaron al momento de ejecutarlo.
 
