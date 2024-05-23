@@ -17,6 +17,8 @@ services:
     build:
       context: /1-server-proxy
       dockerfile: Dockerfile
+      args: # Pasa el argumento al Dockerfile, ya que ARG solo está disponible en tiempo de build.
+        PROXY_SERVER_PORT: ${PROXY_SERVER_PORT} # Se pasa para que sea reemplazado en la capa EXPOSE del Dockerfile
     image: joanaws/1-server-proxy:composed
     volumes:
       - ./1-server-proxy/templates:/etc/nginx/templates
