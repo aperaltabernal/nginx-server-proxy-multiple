@@ -1,0 +1,10 @@
+server {
+    listen ${PROXY_SERVER_PORT};
+    location / {
+        proxy_pass http://${PROXIED_SERVER_HOSTNAME}:8181;
+    }
+
+    location ~ \.(jpg|png)$ {
+        root /data/images;
+    }
+}
